@@ -187,12 +187,12 @@ const TopBar: React.FC<TopBarProps> = ({
       )}
 
       <div className='flex gap-2 relative' ref={dropdownRef}>
-        <div 
+        {/* <div 
           className='bg-[#F5F5F5] rounded-lg w-10 h-10 flex justify-center items-center cursor-pointer relative'
           onClick={() => setShowNotification && setShowNotification(!showNotification)}
         >
           <BellIcon size={16} color='#191A1B' />
-          {/* Red dot indicator for unread notifications */}
+
           {unreadCount > 0 && (
             <div className='absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center'>
               {unreadCount > 9 ? (
@@ -202,7 +202,7 @@ const TopBar: React.FC<TopBarProps> = ({
               )}
             </div>
           )}
-        </div>
+        </div> */}
         <div 
           className='text-white text-sm bg-red-400 rounded-lg w-10 h-10 flex justify-center items-center cursor-pointer'
           onClick={() => setShowDropdown(!showDropdown)}

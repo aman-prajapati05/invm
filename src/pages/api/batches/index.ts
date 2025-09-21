@@ -61,55 +61,6 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
         }
       }
 
-      /**
-       * POST - Add new batch + create job
-       */
-      // case "POST": {
-      //   try {
-      //     const { productId, batchCode, quantity, mfg_date, shelf_life_days } = req.body
-      //     if (!productId || !batchCode || !quantity || !mfg_date || !shelf_life_days) {
-      //       return res.status(400).json({ message: "Missing required fields" })
-      //     }
-
-      //     const product = await productsCollection.findOne({ _id: new ObjectId(productId) })
-      //     if (!product) return res.status(404).json({ message: "Product not found" })
-
-      //     const newBatchId = new ObjectId()
-      //     const mfgDateObj = new Date(mfg_date)
-      //     const expiryDate = new Date(mfgDateObj.getTime() + shelf_life_days * 24 * 60 * 60 * 1000)
-
-      //     const newBatch = {
-      //       _id: newBatchId,
-      //       productId: new ObjectId(productId),
-      //       batchCode,
-      //       quantity,
-      //       mfg_date: mfgDateObj,
-      //       shelf_life_days,
-      //       createdAt: new Date(),
-      //       updatedAt: new Date(),
-      //     }
-
-      //     await batchesCollection.insertOne(newBatch)
-
-      //     // create expiry reminder job
-      //     const notifyAt = new Date(expiryDate.getTime() - 5 * 24 * 60 * 60 * 1000)
-
-      //     await jobsCollection.insertOne({
-      //       batchId: newBatchId,
-      //       productId: new ObjectId(productId),
-      //       type: "expiry-reminder",
-      //       notifyAt,
-      //       expiryDate,
-      //       status: "scheduled",
-      //       createdAt: new Date(),
-      //     })
-
-      //     return res.status(201).json({ message: "Batch created", batch: newBatch })
-      //   } catch (error) {
-      //     console.error("Error creating batch:", error)
-      //     return res.status(500).json({ message: "Failed to create batch" })
-      //   }
-      // }
       case "POST": {
   try {
     const { productId, batchCode, quantity, mfg_date, shelf_life_days } = req.body

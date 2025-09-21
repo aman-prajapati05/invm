@@ -3,6 +3,7 @@
 import LabelMaker from '@/components/LabelMaker'
 import React from 'react'
 import useProtectedRoute from '@/lib/useProtectedRoute'
+import ExpiryDashboard from '@/components/ExpiryDashboard'
 
 const page = () => {
   const loading = useProtectedRoute(['expiry'])
@@ -17,7 +18,9 @@ const page = () => {
   }
 
   return (
-    <LabelMaker/>
+<>
+<ExpiryDashboard/>
+</>
   )
 }
 
