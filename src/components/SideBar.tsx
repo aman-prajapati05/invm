@@ -1,5 +1,5 @@
 "use client"
-import { AlarmIcon, BarcodeIcon, HouseIcon, ListDashesIcon, PackageIcon, ShippingContainerIcon, StorefrontIcon, TagIcon, TruckIcon, UsersIcon } from '@phosphor-icons/react/dist/ssr'
+import { AlarmIcon, BarcodeIcon, HeadCircuitIcon, HouseIcon, ListDashesIcon, PackageIcon, ShippingContainerIcon, StorefrontIcon, TagIcon, TruckIcon, UsersIcon } from '@phosphor-icons/react/dist/ssr'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import React from 'react'
@@ -42,6 +42,12 @@ const SideBar: React.FC = () => {
       icon: <TruckIcon size={16} weight="bold" color='#191A1B'/>,
       permission: 'categories'
     },
+    {
+      href: '/forecast',
+      label: 'Forecast',
+      icon: <HeadCircuitIcon size={16} weight="bold" color='#191A1B' />
+      // No permission required, always visible
+    },
     { 
       href: '/user', 
       label: 'User', 
@@ -61,8 +67,12 @@ const SideBar: React.FC = () => {
 
 
   const { isSidebarOpen, setSidebarOpen } = useSidebar();
-  // Filter menu items based on user permissions
-  const filteredMenuItems = menuItems.filter(item => hasPermission(item.permission));
+  // Filter menu items based on user permissions, but always show items with no permission key
+  const filteredMenuItems = menuItems.filter(item => {
+    // If permission is undefined, always show
+    if (typeof item.permission === 'undefined') return true;
+    return hasPermission(item.permission);
+  });
 
   if (!isSidebarOpen) return null;
 

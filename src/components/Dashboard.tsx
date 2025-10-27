@@ -2684,13 +2684,13 @@ const Dashboard = () => {
             <h1 className='text-3xl font-bold text-gray-900 mb-2'>Dashboard</h1>
             <p className='text-gray-600'>Welcome back! Here's what's happening with your business today.</p>
           </div>
-          <div>
+          {/* <div>
             <DateButton
               onDateRangeSelect={handleDateRangeSelect}
               selectedStartDate={selectedStartDate}
               selectedEndDate={selectedEndDate}
             />
-          </div>
+          </div> */}
         </div>
 
         {/* Enhanced Metric Cards with Modern Design */}
