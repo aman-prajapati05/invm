@@ -224,7 +224,7 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
           }
           
           // Prevent deleting the current user
-          if (user && user.id === id) {
+          if (user && user.userId === id) {
             return res.status(400).json({ message: 'Cannot delete your own account' });
           }
 
