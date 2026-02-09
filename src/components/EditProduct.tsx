@@ -2,7 +2,7 @@
 import { XIcon, WarningCircleIcon } from '@phosphor-icons/react/dist/ssr'
 import React, { useState } from 'react'
 import Button from './Button'
-import { createProduct, updateProduct } from '@/lib/api/products';
+import { Product, createProduct, updateProduct } from '@/lib/api/products';
 
 interface EditProductProps {
   mode: 'add' | 'edit';

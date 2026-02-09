@@ -1,6 +1,5 @@
 "use client"
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { initializeSocket, getSocket } from '@/lib/socket';
 import { useAuth } from '@/contexts/AuthContext';
 import api from '@/lib/axios';
 
@@ -181,21 +180,6 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
       fetchNotifications();
     }
   }, [user, accessToken, fetchNotifications]);
-
-  // Initialize socket connection
-  useEffect(() => {
-    const socket = initializeSocket();
-
-    const handleNotification = (notification: NotificationData) => {
-      addNotification(notification);
-    };
-
-    socket.on('notification', handleNotification);
-
-    return () => {
-      socket.off('notification', handleNotification);
-    };
-  }, [addNotification]);
 
   return (
     <NotificationContext.Provider 

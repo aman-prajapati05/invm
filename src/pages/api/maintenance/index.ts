@@ -1,5 +1,5 @@
 // pages/api/maintenance.ts
-import type { NextApiResponse } from 'next';
+import type { NextApiRequest, NextApiResponse } from 'next';
 import { connectToDatabase } from '@/lib/mongodb';
 import { authenticate, type AuthenticatedRequest } from '@/lib/middleware/authMiddleware';
 import { hasAllRequiredPermissions } from '@/lib/utils/checkPermission';
@@ -9,17 +9,22 @@ type AppConfigDoc = {
   maintenance: { enabled: boolean };
 };
 
-const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
+// GET is public so login/forgot-password pages can load without 401
+async function getMaintenance(_req: NextApiRequest, res: NextApiResponse) {
+  const db = await connectToDatabase();
+  const collection = db.collection<AppConfigDoc>('app_config');
+  const doc = await collection.findOne({ _id: 'global' });
+  return res.status(200).json({ enabled: doc?.maintenance?.enabled ?? false });
+}
+
+async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
   const db = await connectToDatabase();
   const collection = db.collection<AppConfigDoc>('app_config');
   const { user } = req;
 
   switch (req.method) {
-    // ✅ Anyone logged in can read maintenance state
-    case 'GET': {
-      const doc = await collection.findOne({ _id: 'global' });
-      return res.status(200).json({ enabled: doc?.maintenance?.enabled ?? false });
-    }
+    case 'GET':
+      return getMaintenance(req, res);
 
     // 🔒 Only admin (all perms) can toggle
     case 'POST': {
@@ -45,7 +50,9 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
       res.setHeader('Allow', ['GET', 'POST']);
       return res.status(405).json({ message: `Method ${req.method} not allowed` });
   }
-};
+}
 
-// 👇 just need authentication, not requireAdmin for the whole handler
-export default authenticate(handler);
+export default async function maintenanceApi(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method === 'GET') return getMaintenance(req, res);
+  return authenticate(handler)(req, res);
+}

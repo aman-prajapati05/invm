@@ -3,8 +3,6 @@ import type { AuthenticatedRequest } from '@/lib/middleware/authMiddleware';
 import { connectToDatabase } from '@/lib/mongodb';
 import { authenticate } from '@/lib/middleware/authMiddleware';
 import webPush from 'web-push';
-import { Server as SocketIOServer } from 'socket.io';
-import { Server as NetServer } from 'http';
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!;
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY!;
@@ -15,22 +13,6 @@ webPush.setVapidDetails(
   VAPID_PRIVATE_KEY
 );
 
-// Add global type augmentation for _io
-declare global {
-  // eslint-disable-next-line no-var
-  var _io: SocketIOServer | undefined;
-}
-
-// Extend the Next.js Server to include `io`
-interface SocketServer extends NetServer {
-  io?: SocketIOServer;
-}
-
-interface SocketWithServer {
-  socket: {
-    server: SocketServer;
-  };
-}
 const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
   if (req.method !== 'POST') return res.status(405).json({ message: 'Method not allowed' });
 
@@ -60,12 +42,7 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
           createdAt: new Date(),
           expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         };
-        const insert = await notificationsCollection.insertOne(notif);
-
-        // If you use Socket.io, emit (safe if io is undefined)
-        const socketWithServer = res as any as { socket?: { server?: any } };
-        const io = socketWithServer?.socket?.server?.io || (global as any)._io;
-        if (io) io.emit('notification', { ...notif, _id: insert.insertedId.toString() });
+        await notificationsCollection.insertOne(notif);
 
         return { userId: sub.userId, success: true };
       } catch (error: any) {

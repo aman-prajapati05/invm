@@ -334,14 +334,14 @@ const ExpiryDashboard: React.FC = () => {
 
       {/* Status Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-        {Object.entries({
+        {(Object.entries({
           expired: 'Expired',
           critical: 'Critical (≤3 days)',
           warning: 'Warning (≤7 days)',
           upcoming: 'Upcoming (≤14 days)',
           good: 'Good (>14 days)',
           inactive: 'Inactive'
-        } as const).map(([status, label]) => {
+        }) as [Exclude<FilterStatus, 'all'>, string][]).map(([status, label]) => {
           const config = getStatusConfig(status);
           const count = statusCounts[status] || 0;
           const Icon = config.icon;

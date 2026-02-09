@@ -40,6 +40,10 @@ const processQueue = (error: any, token: string | null = null) => {
   failedQueue = [];
 };
 
+const isPublicPath = () =>
+  typeof window !== 'undefined' &&
+  ['/login', '/forgot-password', '/set-password'].some((p) => window.location.pathname.startsWith(p));
+
 const api = axios.create();
 
 api.interceptors.request.use(async (config) => {
@@ -60,11 +64,12 @@ api.interceptors.request.use(async (config) => {
         processQueue(null, currentToken);
       } catch (error) {
         processQueue(error, null);
-        // hard logout
-        setAccessToken(null);
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('user');
-        if (logoutCallback) logoutCallback(); else window.location.href = '/login';
+        if (!isPublicPath()) {
+          setAccessToken(null);
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('user');
+          if (logoutCallback) logoutCallback(); else window.location.href = '/login';
+        }
         throw error;
       } finally {
         isRefreshing = false;
@@ -72,7 +77,10 @@ api.interceptors.request.use(async (config) => {
     }
   }
 
-  if (currentToken) config.headers.Authorization = `Bearer ${currentToken}`;
+  if (currentToken) {
+    config.headers.Authorization = `Bearer ${currentToken}`;
+    (config as any)._hadAuth = true; // so response interceptor only redirects when we were "logged in"
+  }
   return config;
 });
 
@@ -82,12 +90,22 @@ api.interceptors.response.use(
     const originalRequest = error.config;
     const status = error?.response?.status;
     const code = error?.response?.data?.code;
+    const hadAuth = !!(originalRequest as any)?._hadAuth || originalRequest?.headers?.Authorization;
 
     const authEndpoints = ['/api/auth/login', '/api/auth/verify-otp', '/api/auth/refresh-token', '/api/auth/logout'];
     const isAuthEndpoint = authEndpoints.some((endpoint) => originalRequest?.url?.includes(endpoint));
     if (isAuthEndpoint) return Promise.reject(error);
 
-    // 🚨 Non-recoverable: do NOT refresh; force logout
+    // If request had no auth, or we're on a public page (e.g. forgot-password), don't redirect — just reject
+    const doRedirect = () => {
+      if (!hadAuth || isPublicPath()) return;
+      setAccessToken(null);
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('user');
+      if (logoutCallback) logoutCallback(); else window.location.href = '/login';
+    };
+
+    // 🚨 Non-recoverable: do NOT refresh; force logout (only if we had auth)
     const hardLogoutCodes = new Set([
       'ACCOUNT_DEACTIVATED',
       'ACCOUNT_DELETED',
@@ -101,32 +119,23 @@ api.interceptors.response.use(
     originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
     return api(originalRequest);
   } catch (e) {
-    setAccessToken(null);
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('user');
-    if (logoutCallback) logoutCallback(); else window.location.href = '/login';
+    doRedirect();
     return Promise.reject(e);
   }
 }
     if (hardLogoutCodes.has(code)) {
-      setAccessToken(null);
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('user');
-      if (logoutCallback) logoutCallback(); else window.location.href = '/login?reason=' + code;
+      doRedirect();
       return Promise.reject(error);
     }
 
     // Loop breaker: if we refreshed very recently and still got 401/403, hard logout
     if ((status === 401 || status === 403) && Date.now() - lastRefreshSuccessAt < 8000) {
-      setAccessToken(null);
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('user');
-      if (logoutCallback) logoutCallback(); else window.location.href = '/login';
+      doRedirect();
       return Promise.reject(error);
     }
 
-    // Try a single refresh for generic 401/403
-    if ((status === 401 || status === 403) && !originalRequest._retry) {
+    // Try a single refresh for generic 401/403 (only if we had sent a token)
+    if (hadAuth && (status === 401 || status === 403) && !originalRequest._retry) {
       originalRequest._retry = true;
 
       if (isRefreshing) {
@@ -147,10 +156,7 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (refreshErr) {
         processQueue(refreshErr, null);
-        setAccessToken(null);
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('user');
-        if (logoutCallback) logoutCallback(); else window.location.href = '/login';
+        doRedirect();
         return Promise.reject(refreshErr);
       } finally {
         isRefreshing = false;

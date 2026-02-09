@@ -102,7 +102,7 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
           console.error('Error fetching expiry jobs:', error);
           return res.status(500).json({ 
             message: 'Failed to fetch expiry jobs',
-            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+            error: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined
           });
         }
       }
@@ -155,7 +155,7 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
           console.error('Error updating job:', error);
           return res.status(500).json({ 
             message: 'Failed to update job',
-            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+            error: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined
           });
         }
       }
@@ -205,7 +205,7 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
           console.error('Error creating job:', error);
           return res.status(500).json({ 
             message: 'Failed to create job',
-            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+            error: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined
           });
         }
       }
@@ -239,7 +239,7 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
           console.error('Error deleting job:', error);
           return res.status(500).json({ 
             message: 'Failed to delete job',
-            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+            error: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined
           });
         }
       }
@@ -255,7 +255,7 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
     console.error('Database connection error:', error);
     return res.status(500).json({ 
       message: 'Internal server error',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong'
+      error: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : 'Something went wrong'
     });
   }
 };
