@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { ClientProviders } from "@/lib/ClientProviders";
-import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
+// import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import { scheduleJobsOnStartup } from "@/lib/jobScheduler"
 
 const geistSans = Geist({
@@ -47,7 +47,7 @@ export default function RootLayout({
         className={inter.className}
       >
            <ClientProviders>
-             <ServiceWorkerRegister/>
+             {/* <ServiceWorkerRegister/> */}
         {children}
         </ClientProviders>
       </body>

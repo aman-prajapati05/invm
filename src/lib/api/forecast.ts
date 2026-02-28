@@ -38,7 +38,7 @@ export const getForecastFromDB = async (
 ): Promise<ForecastResponse> => {
   try {
     const response = await fetch(
-      `${API_BASE_URL}/forecast/from-db/${encodeURIComponent(productName)}?lookback_days=${lookbackDays}`,
+      `${API_BASE_URL}/forecast/${encodeURIComponent(productName)}?lookback_days=${lookbackDays}`,
       {
         method: 'GET',
         headers: {

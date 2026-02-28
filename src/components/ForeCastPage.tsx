@@ -137,14 +137,20 @@ const ForecastPage = () => {
     product.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  const chartData = forecasts.map(f => ({
-    name: f.matched_name?.length > 10 ? f.matched_name.substring(0, 10) + '...' : f.matched_name,
-    predicted: f.predicted_daily_sales_by_model,
-    actual: f.db_avg_daily_sales,
-    stock: f.features_used.Stock_Level,
-    expiry: f.features_used.Days_to_Expiry,
-    reorder: f.recommended_reorder_qty_for_next_week
-  }))
+  const chartData = forecasts.map(f => {
+    const fr = f as ForecastResponse
+    const predicted = fr.predicted_daily_sales_by_model ?? (f as { predicted_daily_sales?: number }).predicted_daily_sales ?? 0
+    const actual = 'db_avg_daily_sales' in f ? fr.db_avg_daily_sales : 0
+    const features = 'features_used' in f ? fr.features_used : { Stock_Level: 0, Days_to_Expiry: 0, SKU: 0 }
+    return {
+      name: (fr.matched_name ?? fr.product_name ?? '')?.length > 10 ? (fr.matched_name ?? fr.product_name ?? '').substring(0, 10) + '...' : (fr.matched_name ?? fr.product_name ?? ''),
+      predicted: Number(predicted),
+      actual: Number(actual),
+      stock: features.Stock_Level ?? 0,
+      expiry: features.Days_to_Expiry ?? 0,
+      reorder: fr.recommended_reorder_qty_for_next_week ?? 0
+    }
+  })
 
   const metrics = calculateMetrics()
   const displayedForecasts = getFilteredForecasts()
@@ -316,31 +322,34 @@ const ForecastPage = () => {
             {/* Predictions vs Actual */}
             <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
               <h3 className="text-xl font-bold text-gray-900 mb-6">Predictions vs Actual Sales</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                  <YAxis tick={{ fontSize: 12 }} />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'white', 
-                      border: 'none', 
-                      borderRadius: '12px', 
-                      boxShadow: '0 10px 25px rgba(0,0,0,0.15)' 
-                    }} 
-                  />
-                  <Legend />
-                  <Bar dataKey="predicted" name="AI Predicted" fill="#8B5CF6" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="actual" name="Actual Avg" fill="#10B981" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+              <div className="w-full" style={{ height: 300 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 60 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis dataKey="name" tick={{ fontSize: 11 }} angle={-35} textAnchor="end" height={60} />
+                    <YAxis tick={{ fontSize: 12 }} width={40} />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: 'white', 
+                        border: 'none', 
+                        borderRadius: '12px', 
+                        boxShadow: '0 10px 25px rgba(0,0,0,0.15)' 
+                      }} 
+                    />
+                    <Legend />
+                    <Bar dataKey="predicted" name="AI Predicted" fill="#8B5CF6" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="actual" name="Actual Avg" fill="#10B981" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </div>
 
             {/* Stock vs Expiry Analysis */}
             <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
               <h3 className="text-xl font-bold text-gray-900 mb-6">Stock Level vs Days to Expiry</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <ScatterChart data={chartData}>
+              <div className="w-full" style={{ height: 300 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                <ScatterChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 40 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                   <XAxis dataKey="stock" name="Stock Level" tick={{ fontSize: 12 }} />
                   <YAxis dataKey="expiry" name="Days to Expiry" tick={{ fontSize: 12 }} />
@@ -355,7 +364,8 @@ const ForecastPage = () => {
                   />
                   <Scatter name="Products" dataKey="expiry" fill="#3B82F6" />
                 </ScatterChart>
-              </ResponsiveContainer>
+                </ResponsiveContainer>
+              </div>
             </div>
           </div>
         )}

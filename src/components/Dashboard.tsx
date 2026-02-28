@@ -369,7 +369,7 @@ const Dashboard = () => {
             </div>
             <div className='bg-green-50 rounded-lg p-3 flex items-center justify-between'>
               <p className='text-xs text-green-700'>💰 Revenue growth</p>
-              {!isSalesLoading && (
+              {/* {!isSalesLoading && (
                 <div className='flex items-center gap-1'>
                   {salesMetrics.salesGrowth >= 0 ? (
                     <TrendingUp className='h-3 w-3 text-green-600' />
@@ -380,7 +380,7 @@ const Dashboard = () => {
                     {Math.abs(salesMetrics.salesGrowth).toFixed(1)}%
                   </span>
                 </div>
-              )}
+              )} */}
             </div>
           </div>
 
