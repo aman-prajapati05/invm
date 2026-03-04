@@ -71,10 +71,6 @@ const EditUser: React.FC<EditUserProps> = ({
         { key: 'dashboard', label: 'Dashboard Access' },
         { key: 'inventory', label: 'Inventory Management' },
         { key: 'expiry', label: 'Expiry Alert' },
-        { key: 'shipping', label: 'Shipping Manifest' },
-        { key: 'sku', label: 'SKU Master Management' },
-        { key: 'buyer', label: 'Buyer Management' },
-        { key: 'courier', label: 'Courier Management' },
         { key: 'user', label: 'User Management' }
       ];
     
